@@ -4,7 +4,7 @@ import './BudgetForm.css';
 
 const API_BASE_URL = 'http://localhost:8000/api/budgets';
 
-const BudgetForm = () => {
+const BudgetForm = ({ audioFields = {} }) => {
   const [formData, setFormData] = useState({
     date: new Date().toISOString().split('T')[0],
     description: '',
@@ -58,6 +58,33 @@ const BudgetForm = () => {
   useEffect(() => {
     calculateTotals();
   }, [formData]);
+
+  // Update form fields when audio processing returns data
+  useEffect(() => {
+    if (Object.keys(audioFields).length > 0) {
+      setFormData(prev => {
+        const updated = { ...prev };
+        
+        // Update only the fields that were provided
+        Object.keys(audioFields).forEach(key => {
+          if (audioFields[key] !== undefined && audioFields[key] !== null) {
+            updated[key] = audioFields[key];
+            
+            // Add visual feedback by briefly highlighting the updated field
+            const input = document.querySelector(`input[name="${key}"]`);
+            if (input) {
+              input.classList.add('field-updated');
+              setTimeout(() => {
+                input.classList.remove('field-updated');
+              }, 2000);
+            }
+          }
+        });
+        
+        return updated;
+      });
+    }
+  }, [audioFields]);
 
   const calculateTotals = () => {
     const totalIncome = 
